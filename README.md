@@ -41,7 +41,7 @@ The project demonstrates proficiency in:
 1. **Clone or Download the Project**
    ```bash
    git clone <repository-url>
-   cd COMPUTE_GRAPH-main
+   cd COMPUTE_GRAPH
    ```
 
 2. **Verify Project Structure**
