@@ -41,7 +41,7 @@ The project demonstrates proficiency in:
 1. **Clone or Download the Project**
    ```bash
    git clone <repository-url>
-   cd zzr3
+   cd COMPUTE_GRAPH-main
    ```
 
 2. **Verify Project Structure**
@@ -252,25 +252,6 @@ C
    - Re-compile using: `javac -d . src/**/*.java`
    - Ensure classpath is set: `java -cp . Main`
 
-### Application Issues
-
-1. **Graph Not Displaying**
-   - Verify the configuration file format (3 lines per agent)
-   - Check browser console (F12) for JavaScript errors
-   - Ensure no cycles in the configuration
-   - Try a simple config file first (test_config.conf)
-
-2. **Topics Not Updating**
-   - Verify topic names match exactly (case-sensitive)
-   - Check that agents are properly connected
-   - Use Reset Topics if values seem stuck
-   - Ensure numeric values are entered for publishing
-
-3. **File Upload Not Working**
-   - Check file extension is .conf
-   - Verify file format (must be divisible by 3 lines)
-   - Try with provided example files first
-
 ## Testing
 
 Run the provided test configurations to verify functionality:
@@ -304,33 +285,3 @@ Run the provided test configurations to verify functionality:
 - **Liskov Substitution**: All agents interchangeable
 - **Interface Segregation**: Clean, minimal interfaces
 - **Dependency Inversion**: Depend on abstractions
-
-## Documentation
-
-### Generating Javadoc
-
-The project includes comprehensive Javadoc comments. To generate the HTML documentation:
-
-**Windows:**
-```bash
-generate_javadoc.bat
-```
-
-**Unix/Linux/Mac:**
-```bash
-chmod +x generate_javadoc.sh
-./generate_javadoc.sh
-```
-
-**Manual generation:**
-```bash
-mkdir docs
-javadoc -d docs -author -version -use -splitindex -windowtitle "Exercise 6 API" src/**/*.java
-```
-
-After generation, open `docs/index.html` in your browser to view the API documentation.
-
-## Credits
-
-Developed for the Advanced Programming course
-Exercise 6 - Final Project
