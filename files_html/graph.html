@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computational Graph</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 5px;
+            background-color: #f8f9fa;
+            height: 100vh;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        .graph-container {
+            height: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+        #graphCanvas {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: block;
+            margin: 0 auto;
+            flex-grow: 1;
+            max-width: 100%;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 5px;
+            font-size: 12px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-shape {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #333;
+        }
+        .topic-shape {
+            background-color: #e3f2fd;
+        }
+        .agent-shape {
+            background-color: #fff3e0;
+            border-radius: 50%;
+        }
+        .graph-info {
+            margin-top: 5px;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="graph-container">
+        <canvas id="graphCanvas" width="{{CANVAS_WIDTH}}" height="{{CANVAS_HEIGHT}}"></canvas>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-shape topic-shape"></div>
+                <span>Topics</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-shape agent-shape"></div>
+                <span>Agents</span>
+            </div>
+        </div>
+        
+        <div class="graph-info">
+            <strong>Graph Information:</strong><br>
+            {{GRAPH_INFO}}
+        </div>
+    </div>
+    
+    <script>
+        // Graph data will be injected here
+        const graphData = {{GRAPH_DATA}};
+        
+        // Canvas setup
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Draw the computational graph
+        function drawGraph() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw connections first (so they appear behind nodes)
+            drawConnections();
+            
+            // Draw nodes
+            drawNodes();
+        }
+        
+        function drawNodes() {
+            graphData.nodes.forEach(node => {
+                if (node.type === 'topic') {
+                    drawTopic(node);
+                } else if (node.type === 'agent') {
+                    drawAgent(node);
+                }
+            });
+        }
+        
+        function drawTopic(node) {
+            // Draw rectangle for topic
+            ctx.fillStyle = '#e3f2fd';
+            ctx.strokeStyle = '#1976d2';
+            ctx.lineWidth = 1.5;
+            
+            ctx.fillRect(node.x - 30, node.y - 12, 60, 24);
+            ctx.strokeRect(node.x - 30, node.y - 12, 60, 24);
+            
+            // Draw text
+            ctx.fillStyle = '#1976d2';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(node.name, node.x, node.y + 3);
+        }
+        
+        function drawAgent(node) {
+            // Draw circle for agent
+            ctx.fillStyle = '#fff3e0';
+            ctx.strokeStyle = '#f57c00';
+            ctx.lineWidth = 1.5;
+            
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, 18, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Draw text with truncation for long names
+            ctx.fillStyle = '#f57c00';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            
+            // Measure text and truncate if needed
+            const maxWidth = 28; // Maximum width for text
+            let text = node.name;
+            let metrics = ctx.measureText(text);
+            
+            if (metrics.width > maxWidth) {
+                // Truncate text and add ellipsis
+                while (metrics.width > maxWidth && text.length > 0) {
+                    text = text.substring(0, text.length - 1);
+                    metrics = ctx.measureText(text + '...');
+                }
+                text = text + '...';
+            }
+            
+            ctx.fillText(text, node.x, node.y + 3);
+        }
+        
+        function drawConnections() {
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1.5;
+            
+            // Group edges by their endpoints to handle multiple edges between same nodes
+            const edgeGroups = {};
+            graphData.edges.forEach((edge, index) => {
+                const key = edge.from + '-' + edge.to;
+                if (!edgeGroups[key]) edgeGroups[key] = [];
+                edgeGroups[key].push(index);
+            });
+            
+            graphData.edges.forEach((edge, index) => {
+                const fromNode = graphData.nodes.find(n => n.id === edge.from);
+                const toNode = graphData.nodes.find(n => n.id === edge.to);
+                
+                if (fromNode && toNode) {
+                    const key = edge.from + '-' + edge.to;
+                    const groupIndex = edgeGroups[key].indexOf(index);
+                    const groupSize = edgeGroups[key].length;
+                    drawArrow(fromNode, toNode, groupIndex, groupSize);
+                }
+            });
+        }
+        
+        function drawArrow(fromNode, toNode, groupIndex, groupSize) {
+            const fromX = fromNode.x;
+            const fromY = fromNode.y;
+            const toX = toNode.x;
+            const toY = toNode.y;
+            
+            // Calculate arrow direction
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            
+            if (length < 1) return; // Skip if nodes are too close
+            
+            // Normalize direction
+            const unitX = dx / length;
+            const unitY = dy / length;
+            
+            // Calculate proper offset based on node type
+            const fromRadius = fromNode.type === 'agent' ? 20 : 30; // agent circle or topic rectangle
+            const toRadius = toNode.type === 'agent' ? 20 : 30;
+            
+            // Adjust endpoints to not overlap with shapes
+            const startX = fromX + unitX * fromRadius;
+            const startY = fromY + unitY * fromRadius;
+            const endX = toX - unitX * toRadius;
+            const endY = toY - unitY * toRadius;
+            
+            // Calculate curve offset based on edge index
+            let curveOffset = 0;
+            if (groupSize > 1) {
+                // Spread multiple edges between same nodes
+                const spread = 25;
+                curveOffset = (groupIndex - (groupSize - 1) / 2) * spread;
+            }
+            
+            // Add curve to prevent edge overlapping
+            const midX = (startX + endX) / 2;
+            const midY = (startY + endY) / 2;
+            
+            // Perpendicular offset for curve
+            const perpX = -unitY * curveOffset;
+            const perpY = unitX * curveOffset;
+            
+            if (Math.abs(curveOffset) < 1) {
+                // Straight line for single edges
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+            } else {
+                // Curved line for multiple edges
+                const controlX = midX + perpX;
+                const controlY = midY + perpY;
+                
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.quadraticCurveTo(controlX, controlY, endX, endY);
+                ctx.stroke();
+            }
+            
+            // Draw arrowhead
+            const arrowLength = 8;
+            const arrowAngle = Math.PI / 6;
+            
+            // Calculate angle at the end point (for curved lines)
+            let endAngle;
+            if (Math.abs(curveOffset) < 1) {
+                endAngle = Math.atan2(dy, dx);
+            } else {
+                // For curved lines, calculate tangent at end point
+                const t = 0.95; // Near the end
+                const tangentX = 2 * (1 - t) * (controlX - startX) + 2 * t * (endX - controlX);
+                const tangentY = 2 * (1 - t) * (controlY - startY) + 2 * t * (endY - controlY);
+                endAngle = Math.atan2(tangentY, tangentX);
+            }
+            
+            ctx.beginPath();
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(
+                endX - arrowLength * Math.cos(endAngle - arrowAngle),
+                endY - arrowLength * Math.sin(endAngle - arrowAngle)
+            );
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(
+                endX - arrowLength * Math.cos(endAngle + arrowAngle),
+                endY - arrowLength * Math.sin(endAngle + arrowAngle)
+            );
+            ctx.stroke();
+        }
+        
+        // Initialize graph when page loads
+        window.onload = function() {
+            drawGraph();
+        };
+    </script>
+</body>
+</html>

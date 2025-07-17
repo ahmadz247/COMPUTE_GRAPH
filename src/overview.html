@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Computational Graph System Overview</title>
+</head>
+<body>
+    <h1>Computational Graph Web Application</h1>
+    
+    <h2>Project Overview</h2>
+    <p>
+        This system implements a web-based computational graph visualization and management tool.
+        It combines publish-subscribe architecture, HTTP server implementation, and interactive 
+        web visualization to create a comprehensive distributed computing demonstration.
+    </p>
+    
+    <h2>Architecture</h2>
+    <p>The system is organized into five main packages:</p>
+    
+    <h3>Core Packages</h3>
+    <ul>
+        <li><b>{@link graph}</b> - Core publish-subscribe system with Topics, Agents, and Messages</li>
+        <li><b>{@link configs}</b> - Configuration management and graph representation with cycle detection</li>
+        <li><b>{@link server}</b> - Multi-threaded HTTP server implementation</li>
+        <li><b>{@link servlets}</b> - Request handlers for various endpoints</li>
+        <li><b>{@link views}</b> - HTML generation and graph visualization</li>
+    </ul>
+    
+    <h2>Key Design Patterns</h2>
+    <ul>
+        <li><b>Singleton Pattern</b> - {@link graph.TopicManagerSingleton} ensures single topic registry</li>
+        <li><b>Decorator Pattern</b> - {@link graph.ParallelAgent} adds async processing to any agent</li>
+        <li><b>Observer Pattern</b> - {@link graph.Topic} implements publish-subscribe messaging</li>
+        <li><b>Factory Pattern</b> - {@link configs.GenericConfig} creates agents via reflection</li>
+        <li><b>Strategy Pattern</b> - Different layout algorithms in {@link views.HtmlGraphWriter}</li>
+    </ul>
+    
+    <h2>SOLID Principles</h2>
+    <p>The codebase demonstrates all five SOLID principles:</p>
+    <ul>
+        <li><b>Single Responsibility</b> - Each class has one clear purpose</li>
+        <li><b>Open/Closed</b> - New agent types can be added without modifying core classes</li>
+        <li><b>Liskov Substitution</b> - All agents are interchangeable via the Agent interface</li>
+        <li><b>Interface Segregation</b> - Clean, minimal interfaces throughout</li>
+        <li><b>Dependency Inversion</b> - Depend on abstractions (interfaces) not implementations</li>
+    </ul>
+    
+    <h2>Key Algorithms</h2>
+    <ul>
+        <li><b>Cycle Detection</b> - DFS with white-gray-black coloring in {@link configs.Graph}</li>
+        <li><b>Graph Layout</b> - Multiple algorithms (bipartite, circular, grid) in {@link views.HtmlGraphWriter}</li>
+        <li><b>Longest Prefix Matching</b> - Servlet routing in {@link server.MyHTTPServer}</li>
+    </ul>
+    
+    <h2>Usage Example</h2>
+    <pre>
+    // Start the server
+    HTTPServer server = new MyHTTPServer(8080, 5);
+    server.addServlet("GET", "/", new HtmlLoader("files_html"));
+    server.start();
+    
+    // Create a simple configuration
+    configs.IncAgent
+    A
+    B
+    </pre>
+    
+    <h2>Author</h2>
+    <p>Advanced Programming Course - Exercise 6</p>
+</body>
+</html>
